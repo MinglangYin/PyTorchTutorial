@@ -54,7 +54,6 @@ class Model(nn.Module):
 
     def forward(self, x_l, x_h):
         y_l = self.net_l(x_l)
-
         y_l_h = self.net_l(x_h)
         y_h_nl = self.net_h_nl(torch.cat((y_l_h, x_h), dim=1))
         y_h_l = self.net_h_l(torch.cat((y_l_h, x_h), dim=1))

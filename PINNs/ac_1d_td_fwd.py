@@ -111,12 +111,8 @@ def main():
     id_i = np.random.choice(x.shape[0], num_i_train, replace=False) 
     id_b = np.random.choice(t.shape[0], num_b_train, replace=False) 
     id_f = np.random.choice(Exact.shape[0], num_f_train, replace=False) 
-
-##
-    # x_i = np.linspace(-1.0, 1.0, 100).reshape((-1,1))
+    
     x_i = x_grid[id_i, 0][:,None]
-    
-    
     t_i = t_grid[id_i, 0][:,None]
     x_i_train = np.hstack((t_i, x_i))
     # u_i_train = init_cond(x_i)
@@ -146,14 +142,6 @@ def main():
     u_i_train = torch.tensor(u_i_train, dtype=torch.float32).to(device)
     u_f_train = torch.tensor(u_f_train, dtype=torch.float32).to(device)
 
-    # print(f'x_i_train: {x_i_train}')
-    # print(f'u_i_train: {u_i_train}')
-    # print(f'x_b_l_train: {x_b_l_train}')
-    # print(f'x_b_r_train: {x_b_r_train}')
-    # print(f'x_f_train: {x_f_train}')
-    # print(f'u_f_train: {u_f_train}')
-    # print(f'x_test: {x_test}')
-
     ## instantiate model
     model = Model().to(device)
 
@@ -169,7 +157,6 @@ def main():
             loss_bc = model.loss_bc(x_b_l_train, x_b_r_train)
             loss_ic = model.loss_ic(x_i_train, u_i_train)
             loss = loss_pde + loss_bc + loss_ic
-            # print(f'epoch {epoch}: loss {loss:.6f} loss_pde {loss_pde:.6f}, loss_bc {loss_bc:.6f}, loss_ic {loss_ic:.6f}')
             loss.backward()
             return loss
         loss = optimizer.step(closure)
@@ -191,50 +178,5 @@ def main():
     u_i_pred = model(x_i_train)
     np.savetxt('x_i_train.txt', to_numpy(u_i_pred))
 
-"""
-    ## plotting
-    fig, ax = newfig(2.0, 1.1)
-    ax.axis('off') 
-    gs0 = gridspec.GridSpec(1, 2)
-    gs0.update(top=1-0.06, bottom=1-1/3, left=0.15, right=0.85, wspace=0)
-    h = ax.imshow(u_test.T, interpolation='nearest', cmap='rainbow', 
-               # extent=[t.min(), t.max(), x.min(), x.max()], 
-                origin='lower', aspect='auto')
-    fig.colorbar(h)
-    ax.plot(x_test[:,1], x_test[:,0], 'kx', label = 'Data (%d points)' % (x_test.shape[0]), markersize = 4, clip_on = False)
-    line = np.linspace(x_test.min(), x_test.max(), 2)[:,None]
-    savefig('./u_test')
-
-    fig, ax = newfig(2.0, 1.1)
-    ax.axis('off') 
-    gs0 = gridspec.GridSpec(1, 2)
-    gs0.update(top=1-0.06, bottom=1-1/3, left=0.15, right=0.85, wspace=0)
-    h = ax.imshow(u_sol.T, interpolation='nearest', cmap='rainbow', 
-               # extent=[t.min(), t.max(), x.min(), x.max()], 
-                origin='lower', aspect='auto')
-    fig.colorbar(h)
-    # ax.plot(x[:,1], x[:,0], 'kx', label = 'Data (%d points)' % (x.shape[0]), markersize = 4, clip_on = False)
-    line = np.linspace(x_test.min(), x_test.max(), 2)[:,None]
-    savefig('./u_sol')
-"""
-
 if __name__ == '__main__':
     main()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
