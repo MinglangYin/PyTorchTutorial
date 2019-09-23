@@ -20,8 +20,6 @@ import torch.nn as nn
 from Utils.others import to_numpy
 from Models.encoder import Encoder
 from Utils.parse import parse
-# from torchsummary import summary
-
 
 # Hyper parameters
 learning_rate = 0.001
