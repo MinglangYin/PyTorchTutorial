@@ -10,9 +10,6 @@ Three standard neural networks coupled to fit high-fidelity data, high-fidelity 
 ## DynNet (Dynamic-graph Network)
 Fully-connected neural network to demonstrate the concept of dynamic graph.
 
-## MFNN (Multi-fidelity Neural Network)
-Three standard neural networks coupled to fit high-fidelity data, high-fidelity data and their linear combination.
-
 ## Gradient
 Calculate gradient in PyTorch
 
