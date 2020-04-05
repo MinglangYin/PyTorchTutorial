@@ -13,7 +13,7 @@ Author: Minglang Yin
 """
 
 import sys
-sys.path.insert(0,'../../Utils')
+# sys.path.insert(0,'../../Utils')
 
 import torch
 import torch.nn as nn
@@ -24,7 +24,7 @@ import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import scipy.io
 
-from plotting import newfig, savefig
+# from plotting import newfig, savefig
 
 torch.manual_seed(1234)
 np.random.seed(1234)
@@ -89,14 +89,14 @@ def main():
     cuda=1
     device = torch.device(f"cuda:{cuda}" if torch.cuda.is_available() else "cpu")
     print(torch.cuda.is_available())
-    epochs = 20000
+    epochs = 100000
     num_i_train = 200
     num_b_train = 100
     num_f_train = 10000
     lr = 0.001
 
     ## pre-processing 
-    data = scipy.io.loadmat('../../Data/AC/AC.mat')
+    data = scipy.io.loadmat('./AC.mat')
     
     ## x: array, x_grid: grid data, X: flatten data
     t = data['tt'].flatten()[:, None]
