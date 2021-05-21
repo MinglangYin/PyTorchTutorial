@@ -86,10 +86,9 @@ def init_cond(x):
 
 def main():
     ## parameters
-    cuda=1
-    device = torch.device(f"cuda:{cuda}" if torch.cuda.is_available() else "cpu")
+    device = torch.device(f"cuda:0" if torch.cuda.is_available() else "cpu")
     print(torch.cuda.is_available())
-    epochs = 100000
+    epochs = 500000
     num_i_train = 200
     num_b_train = 100
     num_f_train = 10000
@@ -97,7 +96,7 @@ def main():
 
     ## pre-processing 
     data = scipy.io.loadmat('./AC.mat')
-    
+
     ## x: array, x_grid: grid data, X: flatten data
     t = data['tt'].flatten()[:, None]
     x = data['x'].flatten()[:, None] 
@@ -175,8 +174,28 @@ def main():
 
     scipy.io.savemat('pred_res.mat',{'t':t, 'x':x, 'u':u_pred})
 
-    u_i_pred = model(x_i_train)
-    np.savetxt('x_i_train.txt', to_numpy(u_i_pred))
+    # u_i_pred = model(x_i_train)
+    # np.savetxt('x_i_train.txt', to_numpy(u_i_pred))
+
+    ## printing
+    x_f_train = np.hstack((T, X))
+    x_f_train = torch.tensor(x_f_train, requires_grad=True, dtype=torch.float32).to(device)
+    u_f_pred = to_numpy(model(x_f_train)).reshape(512,201)
+    u_f_train = to_numpy(Exact.reshape(512,201))
+
+    fig = plt.figure(constrained_layout=False, figsize=(9, 3))
+    gs = fig.add_gridspec(1, 2)
+    ax = fig.add_subplot(gs[0])
+    h = ax.imshow(u_f_pred, cmap='coolwarm', aspect = 0.5)
+
+    ax = fig.add_subplot(gs[1])
+    h = ax.imshow(u_f_train, cmap='coolwarm', aspect = 0.5)
+
+    ax.set_title('Training case (Pred):')
+    fig.colorbar(h, ax=ax)
+
+    fig.savefig('./1D_ac.png')
+    plt.close()
 
 if __name__ == '__main__':
     main()
