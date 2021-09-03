@@ -14,7 +14,7 @@ This repository contains several key models in Physice-informed machine learning
 * Physical-informed Neural Networks (PINNs)
   - Physical-informed neural network for solving partial differential equations, e.g., Allen-Cahn equation(1D time-dependent and 2D equilibrium state)
 * Deep Operator Networks (DeepONet)
-  - DeepONet for learning a PDE operator   
+  - DeepONet for learning a PDE operator
 
 ## Proof of Concept are listed below:
 * DynNet (Dynamic-graph Network)
