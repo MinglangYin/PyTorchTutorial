@@ -16,7 +16,7 @@ This repository contains several key models in Physice-informed machine learning
 * Deep Operator Networks (DeepONet)
   - DeepONet for learning a PDE operator   
 
-##Proof of Concept are listed below:
+## Proof of Concept are listed below:
 * DynNet (Dynamic-graph Network)
   - Fully-connected neural network to demonstrate the concept of dynamic graph.
 * Gradient (Automatic Differentiation)
