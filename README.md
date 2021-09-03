@@ -1,6 +1,7 @@
-# PyTorch Tutorial
-This repository contains several key models written in PyTorch. 
+# PyTorch Tutorial for Physics-informed Machine Learning
+## This repository contains several key models in Physice-informed machine learning (PI-ML) written in PyTorch. 
 
+### Data-driven model
 - NN (Neural Network)
   - Standard fully connected neural networks
 - MFNN (Multi-fidelity Neural Network)
