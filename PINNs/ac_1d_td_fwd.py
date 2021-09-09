@@ -29,16 +29,19 @@ import scipy.io
 torch.manual_seed(1234)
 np.random.seed(1234)
 
+import matplotlib
+matplotlib.use('Agg')
+
 class Model(nn.Module):
     def __init__(self):
         super(Model, self).__init__()
         self.net = nn.Sequential()
-        self.net.add_module('linear_layer_1', nn.Linear(2, 20))
+        self.net.add_module('linear_layer_1', nn.Linear(2, 100))
         self.net.add_module('tanh_layer_1', nn.Tanh())
         for num in range(2,5):
-            self.net.add_module('linear_layer_%d' %(num), nn.Linear(20, 20))
+            self.net.add_module('linear_layer_%d' %(num), nn.Linear(100, 100))
             self.net.add_module('tanh_layer_%d' %(num), nn.Tanh())
-        self.net.add_module('linear_layer_50', nn.Linear(20, 1))
+        self.net.add_module('linear_layer_50', nn.Linear(100, 1))
 
     def forward(self, x):
         return self.net(x)
@@ -49,8 +52,8 @@ class Model(nn.Module):
         u_t, u_x = u_g[:, :1], u_g[:, 1:]
         u_gg = gradients(u_x, x)[0]
         u_xx = u_gg[:,1:]
-        # loss = u_t - 0.0001*u_xx + 5.0*u**3 - 5.0*u
-        loss = u_t - 0.0001*u_xx + u**3 - u
+        loss = u_t - 0.0001*u_xx + 5.0*u**3 - 5.0*u
+        # loss = u_t - 0.0001*u_xx + u**3 - u
         return (loss**2).mean()
 
     def loss_f(self, x, u_f_train):
@@ -87,11 +90,11 @@ def init_cond(x):
 def main():
     ## parameters
     device = torch.device(f"cuda:0" if torch.cuda.is_available() else "cpu")
-    print(torch.cuda.is_available())
-    epochs = 500000
-    num_i_train = 200
-    num_b_train = 100
-    num_f_train = 10000
+    print(f"Use GPU: {torch.cuda.is_available()}")
+    epochs = 250000
+    num_i_train = 300
+    num_b_train = 150
+    num_f_train = 30000
     lr = 0.001
 
     ## pre-processing 
@@ -148,6 +151,7 @@ def main():
     optimizer = torch.optim.Adam(model.parameters(), lr = lr)
 
     # training
+    loss_his = np.zeros((epochs, 3))
     def train(epoch):
         model.train()
         def closure():
@@ -155,23 +159,35 @@ def main():
             loss_pde = model.loss_pde(x_f_train)
             loss_bc = model.loss_bc(x_b_l_train, x_b_r_train)
             loss_ic = model.loss_ic(x_i_train, u_i_train)
-            loss = loss_pde + loss_bc + loss_ic
+            loss = 10*loss_pde + loss_bc + 10*loss_ic
+
+            loss_his[epoch-1, 0] = to_numpy(loss_pde)
+            loss_his[epoch-1, 1] = to_numpy(loss_bc)
+            loss_his[epoch-1, 2] = to_numpy(loss_ic)
+            print(f'epoch {epoch}: loss_pde {loss_pde:.6f}, loss_bc {loss_bc:.6f}, loss_ic {loss_ic:.6f},')
+
             loss.backward()
             return loss
         loss = optimizer.step(closure)
         loss_value = loss.item() if not isinstance(loss, float) else loss
-        print(f'epoch {epoch}: loss {loss_value:.6f}')
+        
 
     print('start training...')
     tic = time.time()
     for epoch in range(1, epochs + 1):    
+        if epoch == 100000:
+            optimizer = torch.optim.Adam(model.parameters(), lr = 0.0001)
+        elif epoch == 200000:
+            optimizer = torch.optim.Adam(model.parameters(), lr = 0.00001)
+        elif epoch == 248000:
+            optimizer = torch.optim.LBFGS(model.parameters())
+
         train(epoch)
     toc = time.time()
     print(f'total training time: {toc-tic}')
 
     u_pred = to_numpy(model(x_test))
     u_pred = u_pred.reshape((exact_grid.shape[0], exact_grid.shape[1]))
-
     scipy.io.savemat('pred_res.mat',{'t':t, 'x':x, 'u':u_pred})
 
     # u_i_pred = model(x_i_train)
@@ -187,14 +203,22 @@ def main():
     gs = fig.add_gridspec(1, 2)
     ax = fig.add_subplot(gs[0])
     h = ax.imshow(u_f_pred, cmap='coolwarm', aspect = 0.5)
-
     ax = fig.add_subplot(gs[1])
     h = ax.imshow(u_f_train, cmap='coolwarm', aspect = 0.5)
-
     ax.set_title('Training case (Pred):')
     fig.colorbar(h, ax=ax)
-
     fig.savefig('./1D_ac.png')
+    plt.close()
+
+    fig = plt.figure(constrained_layout=False, figsize=(4, 4))
+    gs = fig.add_gridspec(1, 1)
+    ax = fig.add_subplot(gs[0])
+    h = ax.plot(loss_his[:, 0], label = "PDE loss")
+    h = ax.plot(loss_his[:, 1], label = "BC loss")
+    h = ax.plot(loss_his[:, 2], label = "IC loss")
+    ax.set_yscale('log')
+    ax.set_title('Loss')
+    fig.savefig('./Loss.png')
     plt.close()
 
 if __name__ == '__main__':
