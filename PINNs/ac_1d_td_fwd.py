@@ -179,8 +179,8 @@ def main():
             optimizer = torch.optim.Adam(model.parameters(), lr = 0.0001)
         elif epoch == 200000:
             optimizer = torch.optim.Adam(model.parameters(), lr = 0.00001)
-        elif epoch == 248000:
-            optimizer = torch.optim.LBFGS(model.parameters())
+        #elif epoch == 248000:
+        #    optimizer = torch.optim.LBFGS(model.parameters())
 
         train(epoch)
     toc = time.time()
